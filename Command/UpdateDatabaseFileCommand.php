@@ -2,14 +2,26 @@
 
 namespace YamilovS\SypexGeoBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class UpdateDatabaseFileCommand extends ContainerAwareCommand
+class UpdateDatabaseFileCommand extends Command
 {
     const DATABASE_FILE_LINK = 'https://sypexgeo.net/files/SxGeoCity_utf8.zip';
     const DATABASE_FILE_NAME = 'SxGeoCity.dat';
+
+    /** @var ContainerInterface */
+    protected $container;
+
+    public function __construct(ContainerInterface $container)
+    {
+        parent::__construct();
+
+        $this->container = $container;
+    }
 
     protected function configure()
     {
@@ -18,9 +30,14 @@ class UpdateDatabaseFileCommand extends ContainerAwareCommand
             ->setDescription('Download and extract new database file to database path');
     }
 
+    /**
+     * @param OutputInterface $output
+     *
+     * @return resource|null
+     */
     protected function getStreamContext(OutputInterface $output)
     {
-        $connection = $this->getContainer()->getParameter('yamilovs_sypex_geo.connection');
+        $connection = $this->container->getParameter('yamilovs_sypex_geo.connection');
         $options = [];
 
         if (empty($connection)) {
@@ -53,19 +70,26 @@ class UpdateDatabaseFileCommand extends ContainerAwareCommand
         return stream_context_create($options);
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     *
+     * @return int|void|null
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $databasePath = $this->getContainer()->getParameter('yamilovs_sypex_geo.database_path');
-        $filesystem = $this->getContainer()->get('filesystem');
+        $io = new SymfonyStyle($input, $output);
+        $databasePath = $this->container->getParameter('yamilovs_sypex_geo.database_path');
+        $filesystem = $this->container->get('filesystem');
         $tmpFileName = sha1(uniqid(mt_rand(), true));
         $tmpFilePath = tempnam(sys_get_temp_dir(), $tmpFileName);
         $archive = file_get_contents(self::DATABASE_FILE_LINK, false, $this->getStreamContext($output));
         $zip = new \ZipArchive();
 
-        $output->writeln('<info>Load database from ' . self::DATABASE_FILE_LINK . '</info>');
+        $io->note('Load database from ' . self::DATABASE_FILE_LINK);
 
         if ($archive === false) {
-            $output->writeln('<error>Cannot download new database file</error>');
+            $io->error('Cannot download new database file');
         } else {
             $filesystem->dumpFile($tmpFilePath, $archive);
         }
@@ -75,9 +99,9 @@ class UpdateDatabaseFileCommand extends ContainerAwareCommand
             $filesystem->dumpFile($databasePath, $newDatabaseFile);
             $zip->close();
             $filesystem->remove($tmpFilePath);
-            $output->writeln("<info>New database file was saved to: $databasePath</info>");
+            $io->note("New database file was saved to: $databasePath");
         } else {
-            $output->writeln('<error>Cannot open zip archive</error>');
+            $io->error('Cannot open zip archive');
         }
     }
 }

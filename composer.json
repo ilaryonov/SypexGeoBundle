@@ -16,12 +16,12 @@
     "MIT"
   ],
   "require": {
-    "php": ">=5.5.9",
+    "php": ">=7.2",
     "ext-zip": "*"
   },
   "require-dev": {
-    "symfony/framework-bundle": "~2.3|~3.0",
-    "symfony/console": "~2.3|~3.0",
+    "symfony/framework-bundle": "^4",
+    "symfony/console": "^4",
     "phpunit/phpunit": "~4.8|~5.0"
   },
   "autoload": {
