@@ -9,3 +9,5 @@ services:
     YamilovS\SypexGeoBundle\Command\:
         resource: '../../Command/*'
         tags: ['console.command']
+        arguments:
+            - "@service_container"
