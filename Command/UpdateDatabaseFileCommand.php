@@ -13,7 +13,7 @@ class UpdateDatabaseFileCommand extends Command
     const DATABASE_FILE_LINK = 'https://sypexgeo.net/files/SxGeoCity_utf8.zip';
     const DATABASE_FILE_NAME = 'SxGeoCity.dat';
 
-    protected static $defaultName = 'yamilovs:sypex-geo:update-database-file';
+    protected static $defaultName = 'yamilovs:sypex:update_database';
 
     /** @var ContainerInterface */
     protected $container;
