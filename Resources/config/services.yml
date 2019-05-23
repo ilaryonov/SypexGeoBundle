@@ -5,3 +5,7 @@ services:
             - "@file_locator"
             - "%yamilovs_sypex_geo.mode%"
             - "%yamilovs_sypex_geo.database_path%"
+
+    YamilovS\SypexGeoBundle\Command\:
+        resource: '../../Command/*'
+        tags: ['console.command']
