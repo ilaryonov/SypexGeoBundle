@@ -17,11 +17,12 @@
   ],
   "require": {
     "php": ">=7.2",
-    "ext-zip": "*"
+    "ext-zip": "*",
+    "symfony/framework-bundle": "^4",
+    "symfony/console": "^4"
   },
   "require-dev": {
-    "symfony/framework-bundle": "^4",
-    "symfony/console": "^4",
+
     "phpunit/phpunit": "~4.8|~5.0"
   },
   "autoload": {
