@@ -6,23 +6,32 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Filesystem\Filesystem;
+use ZipArchive;
 
 class UpdateDatabaseFileCommand extends Command
 {
     const DATABASE_FILE_LINK = 'https://sypexgeo.net/files/SxGeoCity_utf8.zip';
     const DATABASE_FILE_NAME = 'SxGeoCity.dat';
 
-    protected static $defaultName = 'yamilovs:sypex:update_database';
+    protected static $defaultName = 'yamilovs:sypex-geo:update-database-file';
 
-    /** @var ContainerInterface */
-    protected $container;
+    /** @var array */
+    protected $connection;
 
-    public function __construct(ContainerInterface $container)
+    /** @var string */
+    protected $databasePath;
+
+    /** @var Filesystem */
+    protected $filesystem;
+
+    public function __construct(array $connection, string $databasePath, Filesystem $filesystem)
     {
         parent::__construct();
 
-        $this->container = $container;
+        $this->connection = $connection;
+        $this->databasePath = $databasePath;
+        $this->filesystem = $filesystem;
     }
 
     protected function configure()
@@ -37,16 +46,15 @@ class UpdateDatabaseFileCommand extends Command
      */
     protected function getStreamContext(OutputInterface $output)
     {
-        $connection = $this->container->getParameter('yamilovs_sypex_geo.connection');
         $options = [];
 
-        if (empty($connection)) {
+        if (empty($this->connection)) {
             return null;
         }
 
-        if (isset($connection['proxy'])) {
+        if (isset($this->connection['proxy'])) {
             $output->writeln('<info>Using proxy settings for connection</info>');
-            $proxy = $connection['proxy'];
+            $proxy = $this->connection['proxy'];
             $http = [];
 
             if (isset($proxy['host'])) {
@@ -79,27 +87,25 @@ class UpdateDatabaseFileCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
-        $databasePath = $this->container->getParameter('yamilovs_sypex_geo.database_path');
-        $filesystem = $this->container->get('filesystem');
         $tmpFileName = sha1(uniqid(mt_rand(), true));
         $tmpFilePath = tempnam(sys_get_temp_dir(), $tmpFileName);
         $archive = file_get_contents(self::DATABASE_FILE_LINK, false, $this->getStreamContext($output));
-        $zip = new \ZipArchive();
+        $zip = new ZipArchive();
 
         $io->note('Load database from ' . self::DATABASE_FILE_LINK);
 
         if ($archive === false) {
             $io->error('Cannot download new database file');
         } else {
-            $filesystem->dumpFile($tmpFilePath, $archive);
+            $this->filesystem->dumpFile($tmpFilePath, $archive);
         }
 
         if ($zip->open($tmpFilePath) === true) {
             $newDatabaseFile = $zip->getFromName(self::DATABASE_FILE_NAME);
-            $filesystem->dumpFile($databasePath, $newDatabaseFile);
+            $this->filesystem->dumpFile($this->databasePath, $newDatabaseFile);
             $zip->close();
-            $filesystem->remove($tmpFilePath);
-            $io->note("New database file was saved to: $databasePath");
+            $this->filesystem->remove($tmpFilePath);
+            $io->note("New database file was saved to: $this->databasePath");
         } else {
             $io->error('Cannot open zip archive');
         }

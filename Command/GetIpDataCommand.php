@@ -2,14 +2,25 @@
 
 namespace YamilovS\SypexGeoBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use YamilovS\SypexGeoBundle\Manager\SypexGeoManager;
 
-class GetIpDataCommand extends ContainerAwareCommand
+class GetIpDataCommand extends Command
 {
+    /** @var SypexGeoManager */
+    protected $sypexGeoManager;
+
+    public function __construct(SypexGeoManager $sypexGeoManager)
+    {
+        parent::__construct();
+
+        $this->sypexGeoManager = $sypexGeoManager;
+    }
+
     protected function configure() {
         $this
             ->setName('yamilovs:sypex-geo:get-ip-data')
@@ -21,8 +32,7 @@ class GetIpDataCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output) {
         $io = new SymfonyStyle($input, $output);
         $ip = $input->getArgument('ip');
-        $manager = $this->getContainer()->get('yamilovs.sypex_geo.manager');
-        $city_data = $manager->getCity($ip);
+        $city_data = $this->sypexGeoManager->getCity($ip);
 
         $io->title("Data from database file for address $ip");
         $headers = ['Parent', 'Parameter' ,'Value'];

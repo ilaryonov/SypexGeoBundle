@@ -6,8 +6,14 @@ services:
             - "%yamilovs_sypex_geo.mode%"
             - "%yamilovs_sypex_geo.database_path%"
 
-    YamilovS\SypexGeoBundle\Command\:
-        resource: '../../Command/*'
+    YamilovS\SypexGeoBundle\Command\UpdateDatabaseFileCommand:
         tags: ['console.command']
         arguments:
-            - "@service_container"
+            - "%yamilovs_sypex_geo.connection%"
+            - "%yamilovs_sypex_geo.database_path%"
+            - "@filesystem%"
+
+    YamilovS\SypexGeoBundle\Command\GetIpDataCommand:
+      tags: ['console.command']
+      arguments:
+        - "@yamilovs.sypex_geo.manager"
