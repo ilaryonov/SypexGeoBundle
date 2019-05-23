@@ -11,7 +11,7 @@ services:
         arguments:
             - "%yamilovs_sypex_geo.connection%"
             - "%yamilovs_sypex_geo.database_path%"
-            - "@filesystem%"
+            - "@filesystem"
 
     YamilovS\SypexGeoBundle\Command\GetIpDataCommand:
       tags: ['console.command']
