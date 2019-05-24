@@ -57,6 +57,7 @@ class SypexGeoProvider extends AbstractProvider implements Provider
 
         $addresses = [];
         $addresses[] = Address::createFromArray([
+            'providedBy' => $this->getName(),
             'latitude' => isset($results['city']['lat']) ? $results['city']['lat'] : 0,
             'longitude' => isset($results['city']['lon']) ? $results['city']['lon'] : 0,
             'locality' => isset($results['city']['name_ru']) ? $results['city']['name_ru'] : null,
@@ -68,6 +69,7 @@ class SypexGeoProvider extends AbstractProvider implements Provider
                 ]
             ] : [],
             'country' => isset($results['country']['name_ru']) ? $results['country']['name_ru'] : null,
+            'countryCode' => isset($results['country']['iso']) ? $results['country']['iso'] : null,
         ]);
 
         return new AddressCollection($addresses);
