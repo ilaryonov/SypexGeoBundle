@@ -25,6 +25,7 @@ class YamilovsSypexGeoExtension extends Extension
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yml');
+
         $container->setParameter($this->getAlias() . '.database_path', $config['database_path']);
         $container->setParameter($this->getAlias() . '.mode', self::convertModeToInt($config['mode']));
         $container->setParameter($this->getAlias() . '.connection', $config['connection']);
